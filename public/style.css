@@ -93,3 +93,15 @@ h1{
     top:1rem;
     left:10rem;
 }
+#bidRedX{
+    color:red;
+    display: block;
+    top:-10rem;
+    left:18rem;
+    text-align: center;
+    position: absolute;
+}
+#redXh2{
+    font-size: 900px;
+
+}

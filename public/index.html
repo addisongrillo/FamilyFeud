@@ -19,30 +19,38 @@
         class AnswerList extends React.Component {
             state = {
                 answers: [],
-                wrongCount: 0
+                wrongCount: null,
+                showBigX: false
             }
             getAnswers = () => {
                 axios.get('/answers')
                     .then(response => this.setState({ answers: response.data }))
                 axios.get('/wrongCount')
-                    .then(response => this.setState({ wrongCount: response.data }))
+                    .then(response => {
+                        if(response.data > this.state.wrongCount && this.state.wrongCount !== null){
+                            this.setState({ showBigX: true })
+                            setTimeout(() => {this.setState({showBigX:false})}, 1000);
+                        }
+                        this.setState({ wrongCount: response.data })
+                    })
             }
             componentDidMount() {
                 this.getAnswers()
                 this.interval = setInterval(() => this.getAnswers(), 100);
             }
             renderWrongX = () => {
-                let res=''
-                for(let i = 0; i < this.state.wrongCount; i++){
+                let res = ''
+                for (let i = 0; i < this.state.wrongCount; i++) {
                     res += 'X  '
                 }
-                return(
+                return (
                     <h1>{res}</h1>
                 )
             }
             render() {
                 return (
                     <div>
+                        {this.state.showBigX && (<div id='bidRedX'><h2 id='redXh2'> X</h2></div>)}
                         <img src='assets/template.jpg' alt="template" id='template'></img>
                         {
                             this.renderWrongX()
