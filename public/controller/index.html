@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Family Fued Controller</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+</head>
+
+<body class="container">
+    <div id="root"></div>
+    <script type="text/babel">
+        const options = [
+            { id: 0, answerText: 'Money', number: '54' },
+            { id: 1, answerText: 'Life/Souls', number: '18' },
+            { id: 2, answerText: 'Animals', number: '8' },
+            { id: 3, answerText: 'World', number: '7' },
+            { id: 0, answerText: 'Prices', number: '36' },
+            { id: 1, answerText: 'Phones', number: '23' },
+            { id: 2, answerText: 'Crowds', number: '21' },
+            { id: 3, answerText: 'Lines', number: '6' },
+            { id: 0, answerText: 'Hair', number: '84' },
+            { id: 1, answerText: 'Eggs', number: '10' },
+            { id: 2, answerText: 'Shoes', number: '4' },
+            { id: 3, answerText: 'Shirts', number: '2' },
+        ]
+        class Controller extends React.Component {
+            correct = new Audio("../assets/correct.mp3")
+            buzzer = new Audio("../assets/buzzer.mp3")
+            state = {
+                answers:[],
+                wrongCount: 0
+            }
+            handleClick = option => {
+                axios.post('/answers', option)
+                    .then(response => {
+                        this.setState({ answers: response.data })
+                    })
+                this.correct.play()
+            }
+
+            deleteAnswer = id => {
+                axios.delete(`/answers/${id}`)
+                    .then(response => {
+                        let { answers } = this.state
+                        answers = response.data
+                        this.setState({ answers })
+                    })
+            }
+            deleteAll = () => {
+                axios.delete(`/answersAll`)
+                    .then(response => {
+                        let { answers } = this.state
+                        answers = response.data
+                        this.setState({ answers })
+                    })
+            }
+            getAnswersAndCount = () => {
+                axios.get('/answers')
+                    .then(response => this.setState({ answers: response.data}))
+                axios.get('/wrongCount')
+                    .then(response => this.setState({ wrongCount: response.data }))
+            }
+            componentDidMount() {
+                this.getAnswersAndCount()
+            }
+            wrongAnswer = () => {
+                this.buzzer.play()
+                axios.post('/wrongCount')
+                    .then(response => this.setState({ wrongCount: response.data }))
+                }
+            resetWrongAnswer = () => {
+                axios.delete('/wrongCount')
+                    .then(response => this.setState({ wrongCount: response.data }))
+            }
+            render() {
+                return (
+                    <React.Fragment>
+                        <div id='top'>
+                            <h1>Family Fued Controller</h1>
+                            <button
+                                className="btn btn-danger"
+                                onClick={() => { this.deleteAll() }}
+                            >Delete All</button>
+                        </div>
+                        <div id='questionGroupContainer'>
+                            <div className='questionContainer'>
+                                <h3>Tell me something people think needs saving</h3>
+                                <div className='optionContainer'>
+                                    {
+                                        options.slice(0, 4).map(o => (
+                                            <button
+                                                key={o.id + o.answerText}
+                                                className="btn btn-primary optionBtn"
+                                                value={o}
+
+                                                onClick={() => this.handleClick(o)}
+                                            >{o.answerText}</button>
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                            <div className='questionContainer'>
+                                <h3>In one word, what is the worst thing about going to the Movies?</h3>
+                                <div className='optionContainer'>
+                                    {
+                                        options.slice(4, 8).map(o => (
+                                            <button
+
+                                                className="btn btn-primary optionBtn"
+                                                value={o}
+                                                key={o.id + o.answerText}
+                                                onClick={() => this.handleClick(o)}
+                                            >{o.answerText}</button>
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                            <div className='questionContainer'>
+                                <h3>Name something people dye a differnt color</h3>
+                                <div className='optionContainer'>
+                                    {
+                                        options.slice(8, 12).map(o => (
+                                            <button
+
+                                                className="btn btn-primary optionBtn"
+                                                value={o}
+                                                key={o.id + o.answerText}
+                                                onClick={() => this.handleClick(o)}
+                                            >{o.answerText}</button>
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div id='bottomControls'>
+                            <div>
+                                <h5>displayed</h5>
+                                {
+                                    this.state.answers.map(answer => (
+                                        <div key={answer.id} className='answerDisplay'>
+                                            <p>{answer.answerText}:{answer.number}</p>
+                                            <button
+
+                                                className="btn btn-danger"
+                                                key={answer.id}
+                                                onClick={() => this.deleteAnswer(answer.id)}
+                                            >Delete</button>
+                                        </div>
+
+                                    ))
+                                }
+                            </div>
+                            <div>
+                                <button
+                                    id='wrongAnswer'
+                                    className="btn btn-info"
+                                    onClick={this.wrongAnswer}
+                                >WrongAnswer</button>
+                                <p>Wrong Count:{this.state.wrongCount}</p>
+                                <button
+                                    id='wrongAnswer'
+                                    className="btn btn-info"
+                                    onClick={this.resetWrongAnswer}
+                                >Reset Wrong Answer</button>
+                            </div>
+                        </div>
+
+
+                    </React.Fragment>
+                )
+            }
+        }
+
+        ReactDOM.render(
+            <Controller />,
+            document.getElementById('root'))
+
+    </script>
+
+</body>
+
+</html>

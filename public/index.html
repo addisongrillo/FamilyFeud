@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Family Fued</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+</head>
+
+<body class="container">
+    <div id="root"></div>
+    <script type="text/babel">
+        class AnswerList extends React.Component {
+            state = {
+                answers: [],
+                wrongCount: 0
+            }
+            getAnswers = () => {
+                axios.get('/answers')
+                    .then(response => this.setState({ answers: response.data }))
+                axios.get('/wrongCount')
+                    .then(response => this.setState({ wrongCount: response.data }))
+            }
+            componentDidMount() {
+                this.getAnswers()
+                this.interval = setInterval(() => this.getAnswers(), 100);
+            }
+            renderWrongX = () => {
+                let res=''
+                for(let i = 0; i < this.state.wrongCount; i++){
+                    res += 'X  '
+                }
+                return(
+                    <h1>{res}</h1>
+                )
+            }
+            render() {
+                return (
+                    <div>
+                        <img src='assets/template.jpg' alt="template" id='template'></img>
+                        {
+                            this.renderWrongX()
+                        }
+                        {this.state.answers.length && (
+                            <div>
+                                <div id='guessContainer0'>
+                                    <p className='guess' key={0}>{this.state.answers[0].answerText}</p>
+                                </div>
+                                <div id='guessContainer1'>
+                                    <p className='guess' key={1}>{this.state.answers[1].answerText}</p>
+                                </div>
+                                <div id='guessContainer2'>
+                                    <p className='guess' key={2}>{this.state.answers[2].answerText}</p>
+                                </div>
+                                <div id='guessContainer3'>
+                                    <p className='guess' key={3}>{this.state.answers[3].answerText}</p>
+                                </div>
+                                <div id='numberContainer0'>
+                                    <p className='guess' key={0}>{this.state.answers[0].number}</p>
+                                </div>
+                                <div id='numberContainer1'>
+                                    <p className='guess' key={1}>{this.state.answers[1].number}</p>
+                                </div>
+                                <div id='numberContainer2'>
+                                    <p className='guess' key={2}>{this.state.answers[2].number}</p>
+                                </div>
+                                <div id='numberContainer3'>
+                                    <p className='guess' key={3}>{this.state.answers[3].number}</p>
+                                </div>
+                            </div>)
+                        }
+                    </div>
+                )
+            }
+        }
+
+        ReactDOM.render(
+            <AnswerList />,
+            document.getElementById('root'))
+
+    </script>
+
+</body>
+
+</html>
